@@ -4,9 +4,7 @@ from fpdf import FPDF
 
 db = Database()
 
-
 def buscar_requisitos(cargo_id):
-
     exames_response = db.execute_query('SELECT nome FROM exames WHERE id IN (SELECT exame_id FROM cargo_exame WHERE cargo_id = ?)', (cargo_id,))
     exames = [row[0] for row in exames_response]
 
@@ -39,20 +37,22 @@ def gerar_pdf(nome, data_admissao, cargo, exames, epis, integracoes):
     for integracao in integracoes:
         pdf.cell(200, 10, txt=f'- {integracao}', ln=True)
 
-    pdf.output(f'relatorio_{nome}.pdf')
+    pdf.output("example.pdf")
 
+    return pdf
 
+# Interface principal com Streamlit
 st.title('Sistema de Gestão de Admissões')
 
 cargos = db.get_cargos()
 cargo_ids, cargo_nomes = zip(*cargos)
 
 nome = st.text_input('Nome do Colaborador')
-data_admissao = st.date_input('Data de Admissão')
+data_admissao = st.date_input('Data de Admissão', format="DD/MM/YYYY")
 cargo = st.selectbox('Selecione o Cargo', cargo_nomes)
 
 if st.button('Consultar'):
-    cargo_id =  cargo #cargo_ids[cargo_nomes.index(cargo)]
+    cargo_id = cargo  # cargo_ids[cargo_nomes.index(cargo)]
     exames, epis, integracoes = buscar_requisitos(cargo_id)
     
     st.subheader('Exames Necessários')
@@ -63,7 +63,13 @@ if st.button('Consultar'):
 
     st.subheader('Integrações Necessárias')
     st.write(', '.join(integracoes))
+    pdf = gerar_pdf(nome, data_admissao, cargo, exames, epis, integracoes)
 
-    if st.button('Gerar Relatório PDF'):
-        gerar_pdf(nome, data_admissao, cargo, exames, epis, integracoes)
-        st.success('Relatório gerado com sucesso!')
+    with open("example.pdf", "rb") as f:
+        if st.download_button(
+                    label="Baixar Relatório PDF",
+                    data=f,
+                    file_name=f"relatorio_{nome}.pdf",
+                    mime='application/pdf'
+                ):
+            st.success('Relatório gerado com sucesso!')
