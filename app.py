@@ -1,6 +1,5 @@
 from model import Database
 import streamlit as st
-# from fpdf import FPDF
 from gerador_pdf import PDF
 
 db = Database()
