@@ -1,4 +1,7 @@
 from fpdf import FPDF
+from model import Database
+
+db = Database()
 
 class PDF(FPDF):
 
@@ -80,17 +83,17 @@ class PDF(FPDF):
     def sign_section(self,data_admissao):
         data = data_admissao.strftime('%d/%m/%Y')
         self.set_font('Calibri', 'B', 12)
-        self.cell(0, 6, f'Local: Chapadão do Céu / GO        Data: {data}        Assinatura: ', 1, 1)
+        self.cell(0, 6, f'Local: Campo Grande / GO        Data: {data}        Assinatura: ', 1, 1)
 
     def table_header(self):
         self.set_font('Calibri', 'B', 10)
         
         self.cell(20, 8, 'DATA', 1, 0, 'C')
-        self.cell(15, 8, 'UND', 1, 0, 'C') 
+        self.cell(10, 8, 'UND', 1, 0, 'C') 
         self.cell(25, 8, 'QUANTIDADE', 1, 0, 'C')
-        self.cell(45, 8, 'DESCRIÇÃO DO EPI', 1, 0, 'C')
-        self.cell(20, 8, 'CA', 1, 0, 'C')
-        self.cell(35, 8, 'MOTIVO', 1, 0, 'C')
+        self.cell(75, 8, 'DESCRIÇÃO DO EPI', 1, 0, 'C')
+        self.cell(15, 8, 'CA', 1, 0, 'C')
+        self.cell(15, 8, 'MOTIVO', 1, 0, 'C')
         self.cell(45, 8, 'ASS. COLABORADOR (A)', 1, 0, 'C')
         self.cell(35, 8, 'DATA DEVOLUÇÃO', 1, 0, 'C')
         self.cell(37, 8, 'ASS. RECEPTOR (A)', 1, 1, 'C')
@@ -99,11 +102,11 @@ class PDF(FPDF):
         self.set_font('Calibri', '', 8)
         for epi in epis:
             self.cell(20, 8, data_admissao.strftime('%d/%m/%Y'), 1, align='C')
-            self.cell(15, 8, '', 1, align='C')
+            self.cell(10, 8, '', 1, align='C')
             self.cell(25, 8, '', 1, align='C')
-            self.cell(45, 8, epi, 1, align='C')
-            self.cell(20, 8, '', 1, align='C')
-            self.cell(35, 8, '', 1, align='C')
+            self.cell(75, 8, epi, 1, align='C')
+            self.cell(15, 8, '', 1, align='C')
+            self.cell(15, 8, '', 1, align='C')
             self.cell(45, 8, '', 1, align='C')
             self.cell(35, 8, '', 1, align='C')
             self.cell(37, 8, '', 1, align='C')
@@ -124,4 +127,3 @@ class PDF(FPDF):
         self.table_rows(epis, data_admissao)
         self.observation_and_signatures()
         self.output("exemple.pdf")
-
