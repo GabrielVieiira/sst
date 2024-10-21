@@ -102,9 +102,9 @@ class PDF(FPDF):
         self.set_font('Calibri', '', 8)
         for epi in epis:
             self.cell(20, 8, data_admissao.strftime('%d/%m/%Y'), 1, align='C')
-            self.cell(10, 8, '', 1, align='C')
-            self.cell(25, 8, '', 1, align='C')
-            self.cell(75, 8, epi, 1, align='C')
+            self.cell(10, 8, epi[1], 1, align='C')
+            self.cell(25, 8, str(epi[2]), 1, align='C')
+            self.cell(75, 8, epi[0], 1, align='C')
             self.cell(15, 8, '', 1, align='C')
             self.cell(15, 8, '', 1, align='C')
             self.cell(45, 8, '', 1, align='C')

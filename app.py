@@ -5,17 +5,32 @@ from gerador_pdf import PDF
 db = Database()
 pdf = PDF()
 
+st.set_page_config(layout='wide', initial_sidebar_state='auto')
+
 def buscar_requisitos(cargo_id):
     exames_response = db.execute_query('SELECT nome FROM exames WHERE id IN (SELECT exame_id FROM cargo_exame WHERE cargo_id = ?)', (cargo_id,))
     exames = [row[0] for row in exames_response]
 
-    epis_response = db.execute_query('SELECT nome FROM epis WHERE id IN (SELECT epi_id FROM cargo_epi WHERE cargo_id = ?)', (cargo_id,))
-    epis = [row[0] for row in epis_response]
+    epis_response = db.execute_query('''
+        SELECT  
+            epis.nome, 
+            epis.unidade,
+            cargo_epi.quantidade
+        FROM 
+            epis
+        INNER JOIN
+            cargo_epi ON cargo_epi.epi_id = epis.id
+        WHERE 
+            cargo_epi.cargo_id = ?
+    ''', (cargo_id,))
+
+        # Formatar resposta dos EPIs como uma lista de dicionários
+    epis = [{'nome': row[0], 'unidade': row[1], 'quantidade': row[2]} for row in epis_response]
 
     integracoes_response = db.execute_query('SELECT nome FROM integracoes WHERE id IN (SELECT integracao_id FROM cargo_integracao WHERE cargo_id = ?)', (cargo_id,))
     integracoes = [row[0] for row in integracoes_response]
 
-    return exames, epis, integracoes
+    return exames, epis_response, integracoes
 
 
 st.title('Sistema de Gestão de Admissões')
@@ -35,7 +50,7 @@ if st.button('Consultar'):
     st.write(', '.join(exames))
 
     st.subheader('EPIs Necessários')
-    st.write(', '.join(epis))
+    st.write(epis)
 
     st.subheader('Integrações Necessárias')
     st.write(', '.join(integracoes))

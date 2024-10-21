@@ -105,7 +105,7 @@ class Database:
         
     def get_epis_por_cargo(self, cargo_id):
         query = '''
-        SELECT epi_id FROM cargo_epi WHERE cargo_id = ?
+        SELECT epi_id, quantidade FROM cargo_epi WHERE cargo_id = ?
         '''
         try:
             with self.connect() as conn:
@@ -114,8 +114,7 @@ class Database:
                 cursor = conn.cursor()
                 cursor.execute(query, (cargo_id,))
                 response = cursor.fetchall()
-                epis_ids = [row[0] for row in response]
-                return epis_ids
+                return response
         except sqlite3.Error as e:
             print(f'Erro ao executar a consulta: {e}')
             return None
