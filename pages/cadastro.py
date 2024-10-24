@@ -1,8 +1,6 @@
 import streamlit as st
 from app import db
 
-st.set_page_config(layout='wide', initial_sidebar_state='auto')
-
 def atualizar_requisitos(cargo_id, exames, epis, integracoes):
 
     db.execute_query('DELETE FROM cargo_exame WHERE cargo_id = ?', (cargo_id,))
