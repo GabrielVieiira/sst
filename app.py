@@ -1,12 +1,8 @@
 from model import Database
 import streamlit as st
-from gerador_pdf import PDF
+from gerador_pdf import EPI_PDF, ASO_PDF
 
 st.set_page_config(layout='wide', initial_sidebar_state='auto')
-
-db = Database()
-pdf = PDF()
-
 
 def cpf_validate(numbers):
     #  Obtém os números do CPF e ignora outros caracteres
@@ -94,22 +90,29 @@ dados_cnpj = {
     }
 }
 
+db = Database()
+pdf_epi = EPI_PDF()
+pdf_aso = ASO_PDF(dados_cnpj)
+
 st.title('Sistema de Gestão de Admissões')
 
 cargos = db.get_cargos()
 cargo_ids, cargo_nomes = zip(*cargos)
 empresas = dados_cnpj.keys()
 
-nome = st.text_input('Nome do Colaborador')
-cpf = st.text_input('CPF do Colaborador', max_chars=11)
-matricula = int(st.number_input('Matricula do colaborador',format="%0.0f"))
-data_nascimento = st.date_input('Data de nascimento', format="DD/MM/YYYY")
-data_admissao = st.date_input('Data de Admissão', format="DD/MM/YYYY")
-cargo = st.selectbox('Selecione o Cargo', cargo_nomes)
-empresa = st.selectbox('Selecione a empresa',empresas)
-if cpf_validate(cpf):
+funcionario = {
+    'nome': st.text_input('Nome do Colaborador'),
+    'cpf': st.text_input('CPF do Colaborador', max_chars=11),
+    'matricula': int(st.number_input('Matricula do colaborador', format="%0.0f")),
+    'data_nascimento': st.date_input('Data de nascimento', format="DD/MM/YYYY"),
+    'data_admissao': st.date_input('Data de Admissão', format="DD/MM/YYYY"),
+    'cargo': st.selectbox('Selecione o Cargo', cargo_nomes),
+    'empresa': st.selectbox('Selecione a empresa', empresas)
+}
+
+if cpf_validate(funcionario['cpf']):
     if st.button('Consultar'):
-        cargo_id = cargo  # cargo_ids[cargo_nomes.index(cargo)]
+        cargo_id = funcionario['cargo']  # cargo_ids[cargo_nomes.index(cargo)]
         exames, epis, integracoes = buscar_requisitos(cargo_id)
         
         st.subheader('Exames Necessários')
@@ -120,17 +123,25 @@ if cpf_validate(cpf):
 
         st.subheader('Integrações Necessárias')
         st.write(', '.join(integracoes))
-        pdf.criar_pdf(nome, cargo, data_admissao, epis, cpf, matricula)
+
+        pdf_aso.create_pdf(funcionario, exames)
+        pdf_epi.criar_pdf(funcionario,epis)
 
         with open("exemple.pdf", "rb") as f:
             if st.download_button(
-                        label="Baixar Relatório PDF",
+                        label="Baixar Ficha de EPI PDF",
                         data=f,
-                        file_name=f"relatorio_{nome}.pdf",
+                        file_name=f"relatorio_{funcionario['nome']}.pdf",
                         mime='application/pdf'
                     ):
                 st.success('Relatório gerado com sucesso!')
 
 
-
-
+        with open("aso_relatorio.pdf", "rb") as f:
+            if st.download_button(
+                        label="Baixar ASO PDF",
+                        data=f,
+                        file_name=f"ASO_{funcionario['nome']}.pdf",
+                        mime='application/pdf'
+                    ):
+                st.success('Relatório gerado com sucesso!')
